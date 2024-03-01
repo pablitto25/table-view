@@ -20,18 +20,10 @@ import {
   GridRowModel,
   GridRowEditStopReasons,
 } from "@mui/x-data-grid";
-import {
-  randomCreatedDate,
-  randomTraderName,
-  randomId,
-  randomArrayItem,
-} from "@mui/x-data-grid-generator";
-import { fetchDataVtexProducts } from '@/app/utils/c_bu_get';
+import { randomId } from "@mui/x-data-grid-generator";
+import { C_ER_GET } from "@/app/utils/c_er";
 
-const roles = ["Market", "Finance", "Development"];
-const randomRole = () => {
-  return randomArrayItem(roles);
-};
+
 
 const adminSecret = process.env.NEXT_PUBLIC_HASURA_KEY;
 
@@ -47,7 +39,7 @@ function EditToolbar(props: EditToolbarProps) {
 
   const handleClick = () => {
     const index = randomId();
-    const newRow = { index, ID: "", Sucursal: "", Vendedor: "", BU: "", Pa_s: "", isNew: true };
+    const newRow = { index, ID: "", Asignacion: "", Grupo_de_costos: "", ER: "",  BU: "", isNew: true };
     setRows((oldRows) => [...oldRows, newRow]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
@@ -64,15 +56,15 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-export default function FullFeaturedCrudGrid() {
+export default function C_ER() {
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await fetchDataVtexProducts();
-        const rowsWithId = data.C_BU.map((row: any) => ({ ...row, index: randomId() }));
+        const data = await C_ER_GET();
+        const rowsWithId = data.C_ER.map((row: any) => ({ ...row, index: randomId() }));
         setRows(rowsWithId);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -98,10 +90,6 @@ export default function FullFeaturedCrudGrid() {
   const handleSaveClick = (index: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [index]: { mode: GridRowModes.View } });
   };
-  
-  /* const handleDeleteClick = (index: GridRowId) => () => {
-    setRows(rows.filter((row) => row.index !== index));
-  }; */
 
   const handleDeleteClick = (index: GridRowId) => async () => {
     try {
@@ -117,7 +105,7 @@ export default function FullFeaturedCrudGrid() {
       const { ID } = rowToDelete;
   
       // Realizar la solicitud DELETE al endpoint correspondiente con el ID
-      const response = await fetch(`https://correct-earwig-45.hasura.app/api/rest/c-bu-delete/?_eq=${ID}`, {
+      const response = await fetch(`https://correct-earwig-45.hasura.app/api/rest/c-er-delete/?_eq=${ID}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -153,13 +141,14 @@ export default function FullFeaturedCrudGrid() {
       if (newRow.isNew) {
         // Si es una nueva fila, realizar una solicitud POST para crear un nuevo registro
         const transformedRow = {
-          sucursal: newRow.Sucursal,
-          vendedor: newRow.Vendedor,
-          bu: newRow.BU,
-          pais: newRow.Pa_s,
+          Asignacion: newRow.Asignacion,
+          BU: newRow.BU,
+          ER: newRow.ER,
+          Grupo_de_costos: newRow.Grupo_de_costos,
         };
-  
-        const response = await fetch('https://correct-earwig-45.hasura.app/api/rest/c-bu-post', {
+        console.log(transformedRow);
+        console.log(newRow);
+        const response = await fetch('https://correct-earwig-45.hasura.app/api/rest/c-er-post', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -169,7 +158,7 @@ export default function FullFeaturedCrudGrid() {
         });
   
         if (response.ok) {
-          const data = await response.json();
+          /* const data = await response.json(); */
           const updatedRow = { ...newRow, isNew: false };
           // Agregar la nueva fila al estado de `rows`
           setRows(rows.map((row) => (row.index === newRow.index ? updatedRow : row)));
@@ -179,7 +168,7 @@ export default function FullFeaturedCrudGrid() {
         }
       } else {
         // Si no es una nueva fila, realizar una solicitud PUT para actualizar el registro existente
-        const response = await fetch('https://correct-earwig-45.hasura.app/api/rest/c-bu-put', {
+        const response = await fetch('https://correct-earwig-45.hasura.app/api/rest/c-er-put', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -187,10 +176,10 @@ export default function FullFeaturedCrudGrid() {
           },
           body: JSON.stringify({
             _eq: newRow.ID, // ID de la fila que se va a actualizar
+            Asignacion: newRow.Asignacion,
             BU: newRow.BU,
-            Pa_s: newRow.Pa_s,
-            Sucursal: newRow.Sucursal,
-            Vendedor: newRow.Vendedor,
+            ER: newRow.ER,
+            Grupo_de_costos: newRow.Grupo_de_costos,
           }),
         });
   
@@ -216,24 +205,27 @@ export default function FullFeaturedCrudGrid() {
   const columns: GridColDef[] = [
     { field: 'index', headerName: 'INDEX', width: 80, editable: false },
     { field: 'ID', headerName: 'ID', width: 80, editable: false },
-    { field: 'Sucursal', headerName: 'Sucursal', width: 250, editable: true },
     {
-      field: 'Vendedor',
-      headerName: 'Vendedor',
+      field: 'Asignacion',
+      headerName: 'Asignacion',
       width: 180,
-      align: 'left',
-      headerAlign: 'left',
+      editable: true,
+    },
+    {
+      field: 'Grupo_de_costos',
+      headerName: 'Grupo de costos',
+      width: 180,
+      editable: true,
+    },
+    {
+      field: 'ER',
+      headerName: 'ER',
+      width: 180,
       editable: true,
     },
     {
       field: 'BU',
       headerName: 'BU',
-      width: 180,
-      editable: true,
-    },
-    {
-      field: 'Pa_s',
-      headerName: 'País',
       width: 180,
       editable: true,
     },

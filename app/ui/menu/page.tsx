@@ -19,6 +19,10 @@ import Typography from '@mui/material/Typography';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import FullFeaturedCrudGrid from '../c_bu/page';
+import C_CD from '../c_cd/page';
+import C_Centro_de_costo from '../c_Centro_de_costos/page';
+import C_ER from '../c_ER/page';
+import C_MAP from '../c_map/page';
 
 const drawerWidth = 240;
 
@@ -35,10 +39,12 @@ export default function ResponsiveDrawer() {
       <Divider />
       <List>
         {[
-          { text: 'Inbox', icon: <InboxIcon /> },
+          { text: 'Inicio', icon: <InboxIcon /> },
           { text: 'C_BU', icon: <AddBoxIcon /> },
-          { text: 'Send email', icon: <AddBoxIcon /> },
-          { text: 'Drafts', icon: <AddBoxIcon /> },
+          { text: 'C_CD', icon: <AddBoxIcon /> },
+          { text: 'C_Centro_de_costo', icon: <AddBoxIcon /> },
+          { text: 'C_ER', icon: <AddBoxIcon /> },
+          { text: 'C_MAP', icon: <AddBoxIcon /> },
         ].map(({ text, icon }) => (
           <ListItem key={text} disablePadding>
             <ListItemButton onClick={() => handleTabClick(text)}>
@@ -101,10 +107,12 @@ export default function ResponsiveDrawer() {
         >
           <Toolbar />
           <Typography paragraph>
-            {activeTab === 'Inbox' && 'Text for Inbox Lorem'}
+            {activeTab === 'Inicio' && 'Text for Inbox Lorem'}
             {activeTab === 'C_BU' && <FullFeaturedCrudGrid/>}
-            {activeTab === 'Send email' && 'Text for Starred tres'}
-            {activeTab === 'Drafts' && 'Text for Starred cuatro'}
+            {activeTab === 'C_CD' && <C_CD/>}
+            {activeTab === 'C_Centro_de_costo' && <C_Centro_de_costo/>}
+            {activeTab === 'C_ER' && <C_ER/>}
+            {activeTab === 'C_MAP' && <C_MAP/>}
             {/* Agrega más condiciones según las pestañas y textos Lorem que tengas */}
           </Typography>
         </Box>
