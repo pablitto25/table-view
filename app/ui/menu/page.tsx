@@ -23,6 +23,8 @@ import C_CD from '../c_cd/page';
 import C_Centro_de_costo from '../c_Centro_de_costos/page';
 import C_ER from '../c_ER/page';
 import C_MAP from '../c_map/page';
+import C_TC_CHILE from '../c_tc_chile/page';
+import C_TC_URUGUAY from '../c_tc_uruguay/page';
 
 const drawerWidth = 240;
 
@@ -45,6 +47,8 @@ export default function ResponsiveDrawer() {
           { text: 'C_Centro_de_costo', icon: <AddBoxIcon /> },
           { text: 'C_ER', icon: <AddBoxIcon /> },
           { text: 'C_MAP', icon: <AddBoxIcon /> },
+          { text: 'C_TC_CHILE', icon: <AddBoxIcon /> },
+          { text: 'C_TC_URUGUAY', icon: <AddBoxIcon /> },
         ].map(({ text, icon }) => (
           <ListItem key={text} disablePadding>
             <ListItemButton onClick={() => handleTabClick(text)}>
@@ -113,6 +117,8 @@ export default function ResponsiveDrawer() {
             {activeTab === 'C_Centro_de_costo' && <C_Centro_de_costo/>}
             {activeTab === 'C_ER' && <C_ER/>}
             {activeTab === 'C_MAP' && <C_MAP/>}
+            {activeTab === 'C_TC_CHILE' && <C_TC_CHILE/>}
+            {activeTab === 'C_TC_URUGUAY' && <C_TC_URUGUAY/>}
             {/* Agrega más condiciones según las pestañas y textos Lorem que tengas */}
           </Typography>
         </Box>

@@ -47,7 +47,7 @@ function EditToolbar(props: EditToolbarProps) {
 
   const handleClick = () => {
     const index = randomId();
-    const newRow = { index, ID: "", Sucursal: "", Vendedor: "", BU: "", Pa_s: "", isNew: true };
+    const newRow = { index, ID: "", Sucursal: "", Vendedor: "", BU: "", Pais: "", isNew: true };
     setRows((oldRows) => [...oldRows, newRow]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
@@ -156,7 +156,7 @@ export default function FullFeaturedCrudGrid() {
           sucursal: newRow.Sucursal,
           vendedor: newRow.Vendedor,
           bu: newRow.BU,
-          pais: newRow.Pa_s,
+          pais: newRow.Pais,
         };
   
         const response = await fetch('https://correct-earwig-45.hasura.app/api/rest/c-bu-post', {
@@ -188,7 +188,7 @@ export default function FullFeaturedCrudGrid() {
           body: JSON.stringify({
             _eq: newRow.ID, // ID de la fila que se va a actualizar
             BU: newRow.BU,
-            Pa_s: newRow.Pa_s,
+            Pais: newRow.Pais,
             Sucursal: newRow.Sucursal,
             Vendedor: newRow.Vendedor,
           }),
@@ -232,7 +232,7 @@ export default function FullFeaturedCrudGrid() {
       editable: true,
     },
     {
-      field: 'Pa_s',
+      field: 'Pais',
       headerName: 'País',
       width: 180,
       editable: true,

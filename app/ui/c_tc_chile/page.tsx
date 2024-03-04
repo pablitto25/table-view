@@ -19,12 +19,20 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-  GridValueFormatterParams,
 } from "@mui/x-data-grid";
-import { randomId } from "@mui/x-data-grid-generator";
-import { C_MAP_GET } from "@/app/utils/c_map";
+import {
+  randomCreatedDate,
+  randomTraderName,
+  randomId,
+  randomArrayItem,
+} from "@mui/x-data-grid-generator";
+import { fetchDataVtexProducts } from '@/app/utils/c_bu_get';
+import { C_TC_CHILE_GET } from "@/app/utils/c_tc_chile";
 
-
+const roles = ["Market", "Finance", "Development"];
+const randomRole = () => {
+  return randomArrayItem(roles);
+};
 
 const adminSecret = process.env.NEXT_PUBLIC_HASURA_KEY;
 
@@ -40,7 +48,7 @@ function EditToolbar(props: EditToolbarProps) {
 
   const handleClick = () => {
     const index = randomId();
-    const newRow = { index, ID: "", Cuenta: '', Descripcion: "", Rubro: "",  Paquete_Gastos: "", isNew: true };
+    const newRow = { index, ID: "", Fecha: "", TC: "", isNew: true };
     setRows((oldRows) => [...oldRows, newRow]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
@@ -57,15 +65,15 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-export default function C_MAP() {
+export default function C_TC_CHILE() {
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await C_MAP_GET();
-        const rowsWithId = data.C_MAP.map((row: any) => ({ ...row, index: randomId() }));
+        const data = await C_TC_CHILE_GET();
+        const rowsWithId = data.C_TC_CHILE.map((row: any) => ({ ...row, index: randomId() }));
         setRows(rowsWithId);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -91,6 +99,10 @@ export default function C_MAP() {
   const handleSaveClick = (index: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [index]: { mode: GridRowModes.View } });
   };
+  
+  /* const handleDeleteClick = (index: GridRowId) => () => {
+    setRows(rows.filter((row) => row.index !== index));
+  }; */
 
   const handleDeleteClick = (index: GridRowId) => async () => {
     try {
@@ -106,7 +118,7 @@ export default function C_MAP() {
       const { ID } = rowToDelete;
   
       // Realizar la solicitud DELETE al endpoint correspondiente con el ID
-      const response = await fetch(`https://correct-earwig-45.hasura.app/api/rest/c-map-delete/?_eq=${ID}`, {
+      const response = await fetch(`https://correct-earwig-45.hasura.app/api/rest/c-bu-delete/?_eq=${ID}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -142,14 +154,13 @@ export default function C_MAP() {
       if (newRow.isNew) {
         // Si es una nueva fila, realizar una solicitud POST para crear un nuevo registro
         const transformedRow = {
-          Cuenta: newRow.Cuenta,
-          Descripcion: newRow.Descripcion,
-          Rubro: newRow.Rubro,
-          Paquete_Gastos: newRow.Paquete_Gastos,
+          sucursal: newRow.Sucursal,
+          vendedor: newRow.Vendedor,
+          bu: newRow.BU,
+          pais: newRow.Pais,
         };
-        console.log(transformedRow);
-        console.log(newRow);
-        const response = await fetch('https://correct-earwig-45.hasura.app/api/rest/c-map-post', {
+  
+        const response = await fetch('https://correct-earwig-45.hasura.app/api/rest/c-bu-post', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -159,7 +170,7 @@ export default function C_MAP() {
         });
   
         if (response.ok) {
-          /* const data = await response.json(); */
+          const data = await response.json();
           const updatedRow = { ...newRow, isNew: false };
           // Agregar la nueva fila al estado de `rows`
           setRows(rows.map((row) => (row.index === newRow.index ? updatedRow : row)));
@@ -169,7 +180,7 @@ export default function C_MAP() {
         }
       } else {
         // Si no es una nueva fila, realizar una solicitud PUT para actualizar el registro existente
-        const response = await fetch('https://correct-earwig-45.hasura.app/api/rest/c-map-put', {
+        const response = await fetch('https://correct-earwig-45.hasura.app/api/rest/c-bu-put', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -177,10 +188,10 @@ export default function C_MAP() {
           },
           body: JSON.stringify({
             _eq: newRow.ID, // ID de la fila que se va a actualizar
-            Cuenta: newRow.Cuenta,
-            Descripcion: newRow.Descripcion,
-            Rubro: newRow.Rubro,
-            Paquete_Gastos: newRow.Paquete_Gastos,
+            BU: newRow.BU,
+            Pais: newRow.Pais,
+            Sucursal: newRow.Sucursal,
+            Vendedor: newRow.Vendedor,
           }),
         });
   
@@ -205,45 +216,28 @@ export default function C_MAP() {
 
   const columns: GridColDef[] = [
     { field: 'index', headerName: 'INDEX', width: 80, editable: false },
-    { field: 'ID', headerName: 'ID', width: 20, editable: false },
+    { field: 'ID', headerName: 'ID', width: 80, editable: false },
     {
-      field: 'Cuenta',
-      headerName: 'Cuenta',
+      field: 'Fecha',
+      headerName: 'Fecha',
+      width: 150,
+      /* align: 'left', */
+      type: 'Date',
+      headerAlign: 'left',
+      editable: true,
+    },
+    {
+      field: 'TC',
+      headerName: 'TC',
       type: 'number',
-      width: 80,
-      editable: true,
-      valueFormatter: (params: GridValueFormatterParams) => {
-        // Verificar si params.value es un número antes de formatearlo
-        if (typeof params.value === 'number') {
-          return params.value.toFixed(0);
-        } else {
-          return ''; // O cualquier otro valor que desees mostrar si no es un número
-        }
-      }
-    },
-    {
-      field: 'Descripcion',
-      headerName: 'Descripcion',
-      width: 350,
+      width: 150,
       editable: true,
     },
-    {
-      field: 'Rubro',
-      headerName: 'Rubro',
-      width: 120,
-      editable: true,
-    },
-    {
-      field: 'Paquete_Gastos',
-      headerName: 'Paquete Gastos',
-      width: 250,
-      editable: true,
-    },
-    {
+    /* {
       field: "actions",
       type: "actions",
       headerName: "Actions",
-      width: 100,
+      width: 150,
       cellClassName: "actions",
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -284,7 +278,7 @@ export default function C_MAP() {
           />,
         ];
       },
-    },
+    }, */
   ];
 
   return (
